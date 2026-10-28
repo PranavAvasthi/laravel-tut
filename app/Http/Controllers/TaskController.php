@@ -39,4 +39,11 @@ class TaskController extends Controller
             "data" => $this->taskService->getPendingTasks()
         ]);
     }
+
+    public function completed(): JsonResponse
+    {
+        return response()->json([
+            "data" => $this->taskService->getCompletedTasks()
+        ]);
+    }
 }

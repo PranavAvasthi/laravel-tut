@@ -2,44 +2,28 @@
 
 namespace App\Services;
 
+use App\Models\Task;
+use Illuminate\Database\Eloquent\Collection;
+
 class TaskService
 {
-    private array $tasks = [
-        [
-            "id" => 1,
-            "title" => "Learn PHP",
-            "completed" => true
-        ],
-        [
-            "id" => 2,
-            "title" => "Learn Laravel",
-            "completed" => false
-        ]
-    ];
-
-    public function getAllTasks(): array {
-        return $this->tasks;
+    public function getAllTasks(): Collection 
+    {
+        return Task::all();
     }
 
-    public function findTask(int $id): ?array {
-        foreach($this->tasks as $task) {
-            if($task["id"] === $id) {
-                return $task;
-            }
-        }
-
-        return null;
+    public function findTask(int $id): ?Task 
+    {
+        return Task::find($id);
     }
 
-    public function getPendingTasks(): array {
-        $pendingTasks = [];
+    public function getPendingTasks(): Collection 
+    {
+        return Task::where('completed', false)->get();
+    }
 
-        foreach($this->tasks as $task) {
-            if($task["completed"] === false) {
-                $pendingTasks[] = $task;
-            }
-        }
-
-        return $pendingTasks;
+    public function getCompletedTasks(): Collection
+    {
+        return Task::where('completed', true)->get();
     }
 }
