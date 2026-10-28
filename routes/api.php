@@ -14,3 +14,5 @@ Route::get('/tasks/completed', [TaskController::class, 'completed']);
 Route::get('/tasks/{id}', [TaskController::class, 'show'])
     ->whereNumber('id');
 Route::post('/tasks', [TaskController::class, 'store']);
+Route::patch('/tasks/{id}', [TaskController::class, 'update'])
+    ->whereNumber('id');

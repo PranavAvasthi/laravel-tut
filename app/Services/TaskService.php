@@ -7,17 +7,17 @@ use Illuminate\Database\Eloquent\Collection;
 
 class TaskService
 {
-    public function getAllTasks(): Collection 
+    public function getAllTasks(): Collection
     {
         return Task::all();
     }
 
-    public function findTask(int $id): ?Task 
+    public function findTask(int $id): ?Task
     {
         return Task::find($id);
     }
 
-    public function getPendingTasks(): Collection 
+    public function getPendingTasks(): Collection
     {
         return Task::where('completed', false)->get();
     }
@@ -33,5 +33,14 @@ class TaskService
             'title' => $data['title'],
             'completed' => $data['completed'] ?? false
         ]);
+    }
+
+    public function updateTask(int $id, array $data): Task
+    {
+        $task = Task::findOrFail($id);
+
+        $task->update($data);
+
+        return $task->refresh();
     }
 }

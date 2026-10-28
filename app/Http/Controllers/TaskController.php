@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 
@@ -57,5 +58,16 @@ class TaskController extends Controller
         return response()->json([
             "data" => $task
         ], 201);
+    }
+
+    public function update(UpdateTaskRequest $request, int $id): JsonResponse
+    {
+        $data = $request->validated();
+
+        $task = $this->taskService->updateTask($id, $data);
+
+        return response()->json([
+            'data' => $task,
+        ]);
     }
 }
