@@ -2,39 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 
-class TaskController extends Controller {
-    private array $tasks = [
-        [
-            "id" => 1,
-            "title" => "Learn PHP",
-            "completed" => true
-        ],
-        [
-            "id" => 2,
-            "title" => "Learn Laravel",
-            "completed" => false
-        ]
-    ];
+class TaskController extends Controller
+{
+    public function __construct(
+        private TaskService $taskService
+    ){}
 
-    public function index() : JsonResponse {
+    public function index(): JsonResponse
+    {
         return response()->json([
-            "data" => $this->tasks
+            "data" => $this->taskService->getAllTasks()
         ]);
     }
 
-    public function show(string $id) : JsonResponse {
-        foreach($this->tasks as $task) {
-            if((string)$task["id"] === $id) {
-                return response()->json([
-                    "data" => $task
-                ]);
-            }
+    public function show(int $id): JsonResponse
+    {
+        $task = $this->taskService->findTask($id);
+
+        if($task === null) {
+            return response()->json([
+                "message" => "Task not found"
+            ], 404);
         }
 
         return response()->json([
-            "message" => "Task not found"
-        ], 404);
+            "data" => $task
+        ]);
+    }
+
+    public function pending(): JsonResponse
+    {
+        return response()->json([
+            "data" => $this->taskService->getPendingTasks()
+        ]);
     }
 }
