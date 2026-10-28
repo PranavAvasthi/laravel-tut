@@ -6,6 +6,7 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class TaskController extends Controller
 {
@@ -69,5 +70,12 @@ class TaskController extends Controller
         return response()->json([
             'data' => $task,
         ]);
+    }
+
+    public function destroy(int $id): Response
+    {
+        $this->taskService->deleteTask($id);
+
+        return response()->noContent();
     }
 }

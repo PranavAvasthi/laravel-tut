@@ -43,4 +43,11 @@ class TaskService
 
         return $task->refresh();
     }
+
+    public function deleteTask(int $id): void
+    {
+        $task = Task::findOrFail($id);
+
+        $task->delete();
+    }
 }
