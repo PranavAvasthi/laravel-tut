@@ -26,4 +26,12 @@ class TaskService
     {
         return Task::where('completed', true)->get();
     }
+
+    public function createTask(array $data): Task
+    {
+        return Task::create([
+            'title' => $data['title'],
+            'completed' => $data['completed'] ?? false
+        ]);
+    }
 }

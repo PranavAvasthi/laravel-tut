@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTaskRequest;
 use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 
@@ -45,5 +46,16 @@ class TaskController extends Controller
         return response()->json([
             "data" => $this->taskService->getCompletedTasks()
         ]);
+    }
+
+    public function store(StoreTaskRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        $task = $this->taskService->createTask($data);
+
+        return response()->json([
+            "data" => $task
+        ], 201);
     }
 }
