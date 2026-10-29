@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class TaskService
 {
@@ -12,9 +13,17 @@ class TaskService
         return Task::where('user_id', $userId)->get();
     }
 
+    // public function findTask(int $userId, int $id): ?Task
+    // {
+    //     return Task::where('user_id', $userId)->find($id);
+    // }
+
     public function findTask(int $userId, int $id): ?Task
     {
-        return Task::where('user_id', $userId)->find($id);
+        return Task::query()
+            ->with('user:id,name')
+            ->where('user_id', $userId)
+            ->find($id);
     }
 
     public function getPendingTasks(int $userId): Collection
@@ -75,5 +84,16 @@ class TaskService
         return $this->updateTask($userId, $id, [
             'completed' => false
         ]);
+    }
+
+    public function getPaginatedTasks(
+        int $userId,
+        int $perPage = 10
+    ) : LengthAwarePaginator {
+        return Task::query()
+            ->where('user_id', $userId)
+            ->with('user:id,name')
+            ->orderByDesc('id')
+            ->paginate($perPage);
     }
 }

@@ -8,6 +8,8 @@ use App\Services\TaskService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use App\Http\Resources\TaskResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TaskController extends Controller
 {
@@ -15,16 +17,49 @@ class TaskController extends Controller
         private TaskService $taskService
     ) {}
 
-    public function index(Request $request): JsonResponse
+    // public function index(Request $request): JsonResponse
+    // {
+    //     return response()->json([
+    //         'data' => $this->taskService->getAllTasks(
+    //             $request->user()->id
+    //         )
+    //     ]);
+    // }
+    public function index(Request $request): AnonymousResourceCollection
     {
-        return response()->json([
-            'data' => $this->taskService->getAllTasks(
-                $request->user()->id
-            )
+        $validated = $request->validate([
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:50'],
+            'page' => ['sometimes', 'integer', 'min:1'],
         ]);
+
+        $perPage = (int) ($validated['per_page'] ?? 10);
+
+        $tasks = $this->taskService->getPaginatedTasks(
+            $request->user()->id,
+            $perPage
+        );
+
+        return TaskResource::collection(
+            $tasks->withQueryString()
+        );
     }
 
-    public function show(Request $request, int $id): JsonResponse
+    // public function show(Request $request, int $id): JsonResponse
+    // {
+    //     $task = $this->taskService->findTask(
+    //         $request->user()->id,
+    //         $id
+    //     );
+
+    //     if ($task === null) {
+    //         return response()->json([
+    //             'message' => 'Task not found'
+    //         ], 404);
+    //     }
+
+    //     return response()->json(['data' => $task]);
+    // }
+    public function show(Request $request, int $id): TaskResource
     {
         $task = $this->taskService->findTask(
             $request->user()->id,
@@ -32,12 +67,10 @@ class TaskController extends Controller
         );
 
         if ($task === null) {
-            return response()->json([
-                'message' => 'Task not found'
-            ], 404);
+            abort(404, 'Task not found');
         }
 
-        return response()->json(['data' => $task]);
+        return new TaskResource($task);
     }
 
     public function pending(Request $request): JsonResponse
