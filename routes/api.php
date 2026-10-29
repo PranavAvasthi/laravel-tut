@@ -23,6 +23,8 @@ Route::get('/tasks/{id}', [TaskController::class, 'show'])
 // Update task
 Route::patch('/tasks/{id}', [TaskController::class, 'update'])
     ->whereNumber('id');
+Route::patch('/tasks/{id}/reopen', [TaskController::class, 'reopen'])
+    ->whereNumber('id');
 
 // Delete task
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])

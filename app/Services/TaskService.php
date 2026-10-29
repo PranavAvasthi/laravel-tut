@@ -50,4 +50,11 @@ class TaskService
 
         $task->delete();
     }
+
+    public function reopenTask(int $id): Task
+    {
+        return $this->updateTask($id, [
+            'completed' => false
+        ]);
+    }
 }

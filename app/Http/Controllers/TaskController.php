@@ -78,4 +78,13 @@ class TaskController extends Controller
 
         return response()->noContent();
     }
+
+    public function reopen(int $id): JsonResponse
+    {
+        $task = $this->taskService->reopenTask($id);
+
+        return response()->json([
+            'data' => $task
+        ]);
+    }
 }
