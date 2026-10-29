@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['title', 'completed'])]
 class Task extends Model
@@ -13,5 +15,9 @@ class Task extends Model
         return [
             'completed' => 'boolean' 
         ];
+    }
+
+    public function user(): BelongsTo {
+        return $this->belongsTo(User::class);
     }
 }
