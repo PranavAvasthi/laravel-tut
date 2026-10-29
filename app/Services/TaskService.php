@@ -7,53 +7,72 @@ use Illuminate\Database\Eloquent\Collection;
 
 class TaskService
 {
-    public function getAllTasks(): Collection
+    public function getAllTasks(int $userId): Collection
     {
-        return Task::all();
+        return Task::where('user_id', $userId)->get();
     }
 
-    public function findTask(int $id): ?Task
+    public function findTask(int $userId, int $id): ?Task
     {
-        return Task::find($id);
+        return Task::where('user_id', $userId)->find($id);
     }
 
-    public function getPendingTasks(): Collection
+    public function getPendingTasks(int $userId): Collection
     {
-        return Task::where('completed', false)->get();
+        return Task::where('user_id', $userId)
+            ->where('completed', false)
+            ->get();
     }
 
-    public function getCompletedTasks(): Collection
+    public function getCompletedTasks(int $userId): Collection
     {
-        return Task::where('completed', true)->get();
+        return Task::where('user_id', $userId)
+            ->where('completed', true)
+            ->get();
     }
 
-    public function createTask(array $data): Task
+    public function createTask(int $userId, array $data): Task
     {
-        return Task::create([
-            'title' => $data['title'],
-            'completed' => $data['completed'] ?? false
-        ]);
+        $task = new Task();
+
+        $task->title = $data['title'];
+        $task->completed = $data['completed'] ?? false;
+        $task->user_id = $userId;
+
+        $task->save();
+
+        return $task;
     }
 
-    public function updateTask(int $id, array $data): Task
-    {
-        $task = Task::findOrFail($id);
+    private function findOwnedTaskOrFail(
+        int $userId,
+        int $id
+    ): Task {
+        return Task::where('user_id', $userId)->findOrFail($id);
+    }
+
+    public function updateTask(
+        int $userId,
+        int $id,
+        array $data
+    ): Task {
+        $task = $this->findOwnedTaskOrFail($userId, $id);
 
         $task->update($data);
 
         return $task->refresh();
     }
 
-    public function deleteTask(int $id): void
+    public function deleteTask(int $userId, int $id): void
     {
-        $task = Task::findOrFail($id);
+        $task = $this->findOwnedTaskOrFail($userId, $id);
 
         $task->delete();
     }
 
-    public function reopenTask(int $id): Task
+    public function reopenTask(int $userId, int $id): Task
     {
-        return $this->updateTask($id, [
+        return $this->updateTask($userId, $id, [
             'completed' => false
         ]);
     }

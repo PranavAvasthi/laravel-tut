@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Services\TaskService;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
@@ -12,79 +13,91 @@ class TaskController extends Controller
 {
     public function __construct(
         private TaskService $taskService
-    ){}
+    ) {}
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         return response()->json([
-            "data" => $this->taskService->getAllTasks()
+            'data' => $this->taskService->getAllTasks(
+                $request->user()->id
+            )
         ]);
     }
 
-    public function show(int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
-        $task = $this->taskService->findTask($id);
+        $task = $this->taskService->findTask(
+            $request->user()->id,
+            $id
+        );
 
-        if($task === null) {
+        if ($task === null) {
             return response()->json([
-                "message" => "Task not found"
+                'message' => 'Task not found'
             ], 404);
         }
 
+        return response()->json(['data' => $task]);
+    }
+
+    public function pending(Request $request): JsonResponse
+    {
         return response()->json([
-            "data" => $task
+            'data' => $this->taskService->getPendingTasks(
+                $request->user()->id
+            )
         ]);
     }
 
-    public function pending(): JsonResponse
+    public function completed(Request $request): JsonResponse
     {
         return response()->json([
-            "data" => $this->taskService->getPendingTasks()
-        ]);
-    }
-
-    public function completed(): JsonResponse
-    {
-        return response()->json([
-            "data" => $this->taskService->getCompletedTasks()
+            'data' => $this->taskService->getCompletedTasks(
+                $request->user()->id
+            )
         ]);
     }
 
     public function store(StoreTaskRequest $request): JsonResponse
     {
-        $data = $request->validated();
+        $task = $this->taskService->createTask(
+            $request->user()->id,
+            $request->validated()
+        );
 
-        $task = $this->taskService->createTask($data);
-
-        return response()->json([
-            "data" => $task
-        ], 201);
+        return response()->json(['data' => $task], 201);
     }
 
-    public function update(UpdateTaskRequest $request, int $id): JsonResponse
-    {
-        $data = $request->validated();
+    public function update(
+        UpdateTaskRequest $request,
+        int $id
+    ): JsonResponse {
+        $task = $this->taskService->updateTask(
+            $request->user()->id,
+            $id,
+            $request->validated()
+        );
 
-        $task = $this->taskService->updateTask($id, $data);
-
-        return response()->json([
-            'data' => $task,
-        ]);
+        return response()->json(['data' => $task]);
     }
 
-    public function destroy(int $id): Response
+    public function destroy(Request $request, int $id): Response
     {
-        $this->taskService->deleteTask($id);
+        $this->taskService->deleteTask(
+            $request->user()->id,
+            $id
+        );
 
         return response()->noContent();
     }
 
-    public function reopen(int $id): JsonResponse
+    public function reopen(Request $request, int $id): JsonResponse
     {
-        $task = $this->taskService->reopenTask($id);
+        $task = $this->taskService->reopenTask(
+            $request->user()->id,
+            $id
+        );
 
-        return response()->json([
-            'data' => $task
-        ]);
+        return response()->json(['data' => $task]);
     }
 }
